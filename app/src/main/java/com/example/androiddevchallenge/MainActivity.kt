@@ -16,10 +16,12 @@
 package com.example.androiddevchallenge
 
 import android.os.Bundle
+import android.os.CountDownTimer
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -28,6 +30,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -50,33 +54,50 @@ class MainActivity : AppCompatActivity() {
 // Start building your app here!
 @Composable
 fun MyApp() {
+    var buttonLabel = remember { mutableStateOf("START") }
+    var timeText = remember { mutableStateOf("1:00") }
+
+    val countNum = object : CountDownTimer(60000, 1000) {
+        override fun onTick(millisUntilFinished: Long) {
+            timeText.value =
+                (millisUntilFinished / 1000 / 60).toString() + ":" + (millisUntilFinished / 1000 % 60).toString()
+        }
+
+        override fun onFinish() {
+            timeText.value = "FINISH..."
+        }
+    }
     Surface(color = MaterialTheme.colors.background, modifier = Modifier.fillMaxSize()) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
-            TimeText()
-            SSButton()
+            Text(
+                text = timeText.value,
+                fontSize = 60.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                textAlign = TextAlign.Center
+            )
+            Row(horizontalArrangement = Arrangement.SpaceEvenly) {
+
+                Button(
+                    onClick = {
+                        if (buttonLabel.value == "START") {
+                            countNum.start()
+                            buttonLabel.value = "RESET"
+                        } else {
+                            countNum.cancel()
+                            timeText.value = "1:00"
+                            buttonLabel.value = "START"
+                        }
+                    }
+                ) {
+                    Text(text = buttonLabel.value)
+                }
+            }
         }
-    }
-}
-
-@Composable
-fun TimeText() {
-    Text(
-        text = "3:00",
-        fontSize = 60.sp,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        textAlign = TextAlign.Center
-    )
-}
-
-@Composable
-fun SSButton() {
-    Button(onClick = { /*TODO*/ }) {
-        Text("START")
     }
 }
 
